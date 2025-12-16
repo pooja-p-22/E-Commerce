@@ -1,0 +1,49 @@
+# ----------------------------------------------------------------------
+# 1. DEPENDENCY DIRECTORIES
+# ----------------------------------------------------------------------
+# Node modules are large, temporary files and should never be committed.
+
+/node_modules # Standard root node_modules (if you used npm install at root)
+/*/node_modules # For all sub-directories (backend, frontend)
+
+# ----------------------------------------------------------------------
+# 2. ENVIRONMENT VARIABLES (Secrets)
+# ----------------------------------------------------------------------
+# .env files contain database connection strings, API keys, and JWT secrets.
+# They MUST NOT be committed to the repository for security reasons.
+
+/.env
+/backend/.env
+# If your frontend used .env files, include them too:
+/frontend/.env
+
+# ----------------------------------------------------------------------
+# 3. BUILD, TEMP, AND LOG FILES
+# ----------------------------------------------------------------------
+
+# Compiled/Bundled JavaScript for the frontend (Vite/React output)
+/frontend/dist
+
+# Logs and debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# MongoDB related files
+*.mdb
+*.lock
+
+# ----------------------------------------------------------------------
+# 4. OS & IDE Specific Files
+# ----------------------------------------------------------------------
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Vim/Nano
+*~
+# Backup files
+*.swp

@@ -1,0 +1,23 @@
+{
+  "name": "e-commerce",
+  "version": "1.0.0",
+  "description": "MERN Stack Grocery E-Commerce with Unified Frontend",
+  "main": "index.js",
+  "scripts": {
+    
+    "dev:backend": "cd backend && npm start",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
+  },
+  "keywords": [
+    "MERN",
+    "E-Commerce",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
