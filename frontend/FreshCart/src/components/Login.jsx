@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
+import { useAuth } from "../contexts/AuthContext";
 
 const Page = styled.div`
   min-height: 100vh;
@@ -140,17 +142,59 @@ const Helper = styled.p`
   color: #7f8c8d;
 `;
 
+const ErrorMessage = styled.div`
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background-color: #fee;
+  color: #c00;
+  border: 1px solid #fcc;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+`;
+
+const SuccessMessage = styled.div`
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background-color: #efe;
+  color: #060;
+  border: 1px solid #cfc;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+`;
+
 const Login = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, error, user } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // integrate real auth here
-    console.log("Login data:", form);
+    setLoading(true);
+    setLocalError("");
+    setSuccess("");
+
+    try {
+      await login(form.email, form.password);
+      setSuccess("Login successful! Redirecting...");
+      setTimeout(() => {
+        const from = location.state?.from?.pathname || "/";
+        navigate(from);
+      }, 1000);
+    } catch (err) {
+      setLocalError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleRegisterClick = () => navigate("/register");
 
   return (
     <Page>
@@ -159,6 +203,10 @@ const Login = () => {
         <Card>
           <Title>Welcome back</Title>
           <Subtitle>Login to continue shopping with FreshCart.</Subtitle>
+          {(localError || error) && (
+            <ErrorMessage>{localError || error}</ErrorMessage>
+          )}
+          {success && <SuccessMessage>{success}</SuccessMessage>}
           <Form onSubmit={handleSubmit}>
             <div>
               <Label htmlFor="email">Email address</Label>
@@ -193,12 +241,16 @@ const Login = () => {
               <LinkButton type="button">Forgot password?</LinkButton>
             </Row>
 
-            <SubmitButton type="submit">Login</SubmitButton>
+            <SubmitButton type="submit" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
+            </SubmitButton>
           </Form>
 
           <Helper>
             New to FreshCart?{" "}
-            <LinkButton type="button">Create an account</LinkButton>
+            <LinkButton type="button" onClick={handleRegisterClick}>
+              Create an account
+            </LinkButton>
           </Helper>
         </Card>
       </Wrapper>

@@ -3,6 +3,7 @@ import React from "react";
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "./CartContext";
+import { useAuth } from "../contexts/AuthContext";
 
 
 const NavbarContainer = styled.nav`
@@ -48,7 +49,7 @@ const NavLink = styled.button`
   cursor: pointer;
   font-size: 0.98rem;
   font-weight: 500;
-  color: ${p => (p.active ? "#1d6fd6" : "#7f8c8d")};
+  color: ${p => (p.$active ? "#1d6fd6" : "#7f8c8d")};
   transition: background 0.25s ease, color 0.25s ease, transform 0.08s ease;
 
   &:hover {
@@ -108,30 +109,55 @@ const CartBadge = styled.span`
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { cartItems } = useCart();
-  const count = cartItems.reduce((sum, i) => sum + i.qty, 0);
+  const { cartItems, getTotalItems } = useCart();
+  const { user, logout, isAuthenticated, isAdmin } = useAuth();
+  const count = getTotalItems();
 
   const isActive = path => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <NavbarContainer>
       <NavContent>
         <Logo onClick={() => navigate("/dashboard")}>FreshCart</Logo>
         <NavLinks>
-          <NavLink active={isActive("/categories")} onClick={() => navigate("/categories")}>
+          <NavLink $active={isActive("/categories")} onClick={() => navigate("/categories")}>
             Categories
           </NavLink>
-          <NavLink active={isActive("/products")} onClick={() => navigate("/products")}>
+          <NavLink $active={isActive("/products")} onClick={() => navigate("/products")}>
             Products
           </NavLink>
-          <NavLink active={isActive("/register")} onClick={() => navigate("/register")}>
-            Register
-          </NavLink>
-          <NavLink active={isActive("/login")} onClick={() => navigate("/login")}>
-            Login
-          </NavLink>
+          
+          {isAdmin && (
+            <NavLink $active={isActive("/admin")} onClick={() => navigate("/admin")}>
+              Admin
+            </NavLink>
+          )}
 
-          {/* Cart with built-in icon */}
+          {isAuthenticated ? (
+            <>
+              <NavLink $active={isActive("/orders")} onClick={() => navigate("/orders")}>
+                Orders
+              </NavLink>
+              <NavLink title={user?.email}>{user?.name || "User"}</NavLink>
+              <NavLink onClick={handleLogout}>Logout</NavLink>
+            </>
+          ) : (
+            <>
+              <NavLink $active={isActive("/register")} onClick={() => navigate("/register")}>
+                Register
+              </NavLink>
+              <NavLink $active={isActive("/login")} onClick={() => navigate("/login")}>
+                Login
+              </NavLink>
+            </>
+          )}
+
+          {/* Cart icon only */}
           <CartButton onClick={() => navigate("/cart")}>
             <CartIcon>🛒</CartIcon>
             {count > 0 && <CartBadge>{count}</CartBadge>}

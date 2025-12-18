@@ -40,6 +40,9 @@ const protect = asyncHandler(async (req, res, next) => {
             }
         } else {
             req.user = await User.findById(decoded.id).select('-password');
+            if (req.user) {
+                req.user.role = req.user.role || 'customer'; // Ensure role is set
+            }
         }
 
         if (!req.user) {

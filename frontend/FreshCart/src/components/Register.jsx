@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
+import { useAuth } from "../contexts/AuthContext";
 
 const Page = styled.div`
   min-height: 100vh;
@@ -87,6 +89,23 @@ const Input = styled.input`
   }
 `;
 
+const Select = styled.select`
+  margin-top: 0.25rem;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1.8px solid #dde4ec;
+  font-size: 0.95rem;
+  outline: none;
+  background: white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255,107,107,0.18);
+  }
+`;
+
 const Row2 = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -126,22 +145,76 @@ const Helper = styled.p`
   color: #7f8c8d;
 `;
 
+const ErrorMessage = styled.div`
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background-color: #fee;
+  color: #c00;
+  border: 1px solid #fcc;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+`;
+
+const SuccessMessage = styled.div`
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background-color: #efe;
+  color: #060;
+  border: 1px solid #cfc;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+`;
+
 const Register = () => {
+  const navigate = useNavigate();
+  const { register, error } = useAuth();
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    role: "customer",
   });
+  const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // plug in backend API here
-    console.log("Register data:", form);
+    setLoading(true);
+    setLocalError("");
+    setSuccess("");
+
+    // Validate passwords match
+    if (form.password !== form.confirmPassword) {
+      setLocalError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setLocalError("Password must be at least 6 characters");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await register(form.name, form.email, form.password, form.role);
+      setSuccess("Account created successfully! Redirecting to home...");
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+    } catch (err) {
+      setLocalError(err.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleLoginClick = () => navigate("/login");
 
   return (
     <Page>
@@ -150,6 +223,10 @@ const Register = () => {
         <Card>
           <Title>Create account</Title>
           <Subtitle>Fresh groceries. Zero hassle.</Subtitle>
+          {(localError || error) && (
+            <ErrorMessage>{localError || error}</ErrorMessage>
+          )}
+          {success && <SuccessMessage>{success}</SuccessMessage>}
           <Form onSubmit={handleSubmit}>
             <div>
               <Label htmlFor="name">Full name</Label>
@@ -174,6 +251,20 @@ const Register = () => {
                 onChange={handleChange}
                 required
               />
+            </div>
+
+            <div>
+              <Label htmlFor="role">Account Type</Label>
+              <Select
+                id="role"
+                name="role"
+                value={form.role}
+                onChange={handleChange}
+                required
+              >
+                <option value="customer">Customer</option>
+                <option value="admin">Admin</option>
+              </Select>
             </div>
 
             <Row2>
@@ -204,10 +295,24 @@ const Register = () => {
               </div>
             </Row2>
 
-            <SubmitButton type="submit">Create account</SubmitButton>
+            <SubmitButton type="submit" disabled={loading}>
+              {loading ? "Creating account..." : "Create account"}
+            </SubmitButton>
           </Form>
 
-          <Helper>Already have an account? Login from the navbar.</Helper>
+          <Helper>
+            Already have an account?{" "}
+            <button onClick={handleLoginClick} style={{
+              background: "none",
+              border: "none",
+              color: "#ff6b6b",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "0.9rem",
+            }}>
+              Login here
+            </button>
+          </Helper>
         </Card>
       </Wrapper>
     </Page>

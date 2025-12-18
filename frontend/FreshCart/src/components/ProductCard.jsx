@@ -84,17 +84,41 @@ const AddButton = styled.button`
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
+  // Handle both old format (id, img, price) and new backend format (_id, unitPrice, etc.)
+  const productId = product._id || product.id;
+  const productName = product.name;
+  const productPrice = product.unitPrice || product.price;
+  // Handle backend images array or fallback to old format or default
+  const productImage = (product.images && product.images.length > 0) 
+    ? product.images[0] 
+    : product.image || product.img || "/rice.jpg"; // fallback image
+  const inStock = product.stockQuantity > 0;
+
+  const handleAddToCart = () => {
+    addToCart({
+      id: productId,
+      name: productName,
+      price: productPrice,
+      img: productImage,
+      qty: 1,
+    });
+  };
+
   return (
     <Card>
-      <ProductImage src={product.img} alt={product.name} />
+      <ProductImage src={productImage} alt={productName} />
       <Info>
-        <Name>{product.name}</Name>
+        <Name>{productName}</Name>
         <PriceRow>
-          <Price>₹{product.price.toFixed(2)}</Price>
-          <Tag>Fresh • In stock</Tag>
+          <Price>₹{productPrice?.toFixed(2) || "0.00"}</Price>
+          <Tag>{inStock ? "In stock" : "Out of stock"}</Tag>
         </PriceRow>
-        <AddButton onClick={() => addToCart(product)}>
-          Add to Cart
+        <AddButton 
+          onClick={handleAddToCart}
+          disabled={!inStock}
+          style={{ opacity: inStock ? 1 : 0.5, cursor: inStock ? 'pointer' : 'not-allowed' }}
+        >
+          {inStock ? "Add to Cart" : "Out of Stock"}
         </AddButton>
       </Info>
     </Card>

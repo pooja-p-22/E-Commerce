@@ -3,11 +3,7 @@ const router = express.Router();
 const { protect, admin } = require('../middleware/authMiddleware');
 
 
-const { createProduct, updateProduct } = require('../api-function/productController');
-
-const { getAllOrders, getDeliveryAgents, createDeliveryAgent, assignDeliveryAgent, updateProductStock } = require('../api-function/adminController');
-
-const { createCategory, deleteCategory } = require('../api-function/categoryController');
+const { getAllOrders, getDeliveryAgents, createDeliveryAgent, assignDeliveryAgent, updateProductStock, updateOrderStatus, createProduct, updateProduct, createCategory, deleteCategory } = require('../api-function/adminController');
 
 
 router.route('/products')
@@ -27,7 +23,9 @@ router.route('/categories/:id')
 
 router.get('/orders', protect, admin, getAllOrders); 
 
-router.put('/orders/:orderId/assign', protect, admin, assignDeliveryAgent); 
+router.put('/orders/:orderId/assign', protect, admin, assignDeliveryAgent);
+
+router.put('/orders/:orderId/status', protect, admin, updateOrderStatus); 
 
 router.route('/users/delivery')
     .get(protect, admin, getDeliveryAgents)

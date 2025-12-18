@@ -78,7 +78,7 @@ const getOrdersByUser = asyncHandler(async (req, res) => {
 const getAssignedOrders = asyncHandler(async (req, res) => {
    
     const orders = await Order.find({ deliveryAgent: req.user._id })
-        .where('status').in(['Processing', 'Packed', 'Out for Delivery']) 
+        .populate('user', 'name email')
         .sort({ deliverySlot: 1 }); 
 
     res.json(orders);

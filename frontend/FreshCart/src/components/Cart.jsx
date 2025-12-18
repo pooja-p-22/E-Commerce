@@ -433,17 +433,28 @@ const QuantityControls = styled.div`
 `;
 
 const QtyButton = styled.button`
-  border: none;
-  width: 24px;
-  height: 24px;
+  border: 1px solid #d1d5db;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
-  background: #ffffff;
+  background: #f9fafb;
+  color: #374151;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
 
   &:hover {
     background: #e5e7eb;
+    border-color: #9ca3af;
+  }
+
+  &:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
   }
 `;
 
@@ -534,13 +545,10 @@ const Note = styled.p`
 /* ===================== COMPONENT ===================== */
 
 const Cart = () => {
-  const { cartItems, updateQuantity } = useCart();
+  const { cartItems, updateQuantity, increaseQuantity, decreaseQuantity, removeItem, getTotalPrice } = useCart();
   const navigate = useNavigate();
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
+  const subtotal = getTotalPrice();
   const delivery = cartItems.length ? 40 : 0;
   const total = subtotal + delivery;
 
@@ -571,12 +579,24 @@ const Cart = () => {
                     </ItemPrice>
 
                     <QuantityControls>
-                      <QtyButton onClick={() => updateQuantity(item.id, item.qty - 1)}>-</QtyButton>
+                      <QtyButton 
+                        onClick={() => decreaseQuantity(item.id)}
+                        disabled={item.qty <= 1}
+                        title="Decrease quantity"
+                      >
+                        −
+                      </QtyButton>
                       <QtyValue>{item.qty}</QtyValue>
-                      <QtyButton onClick={() => updateQuantity(item.id, item.qty + 1)}>+</QtyButton>
+                      <QtyButton 
+                        onClick={() => increaseQuantity(item.id)}
+                        disabled={item.qty >= 99}
+                        title="Increase quantity"
+                      >
+                        +
+                      </QtyButton>
                     </QuantityControls>
 
-                    <RemoveButton onClick={() => updateQuantity(item.id, 0)}>
+                    <RemoveButton onClick={() => removeItem(item.id)}>
                       Remove
                     </RemoveButton>
                   </ItemRight>

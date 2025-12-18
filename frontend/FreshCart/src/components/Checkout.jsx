@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from './CartContext';
+import { useAuth } from '../contexts/AuthContext';
+import { orderAPI } from '../services/api';
 
 const CheckoutContainer = styled.div`
   min-height: 100vh;
@@ -121,9 +125,9 @@ const PaymentMethod = styled.div`
 const MethodButton = styled.button`
   flex: 1;
   padding: 1rem;
-  border: 2px solid ${props => props.active ? '#3498db' : '#e1e8ed'};
-  background: ${props => props.active ? '#3498db' : 'white'};
-  color: ${props => props.active ? 'white' : '#2c3e50'};
+  border: 2px solid ${props => props.$active ? '#3498db' : '#e1e8ed'};
+  background: ${props => props.$active ? '#3498db' : 'white'};
+  color: ${props => props.$active ? 'white' : '#2c3e50'};
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -176,13 +180,18 @@ const ConfirmButton = styled.button`
   transition: all 0.3s ease;
   box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
 
-  &:hover {
+  &:hover:not(:disabled) {
     transform: translateY(-3px);
     box-shadow: 0 12px 30px rgba(39, 174, 96, 0.4);
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 
   @media (max-width: 768px) {
@@ -197,20 +206,200 @@ const ConfirmButton = styled.button`
   }
 `;
 
-const Checkout = () => {
-  const [paymentMethod, setPaymentMethod] = useState('card');
+const ErrorMessage = styled.div`
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #fee;
+  color: #c00;
+  border: 1px solid #fcc;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+`;
+
+const SuccessMessage = styled.div`
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #efe;
+  color: #060;
+  border: 1px solid #cfc;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+`;
+
+const OrderSummary = styled.div`
+  background: #f0f8ff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
   
+  h3 {
+    margin-top: 0;
+    color: #2c3e50;
+  }
+`;
+
+const OrderItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #ddd;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const OrderTotal = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 2px solid #2c3e50;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #27ae60;
+`;
+
+const Checkout = () => {
+  const navigate = useNavigate();
+  const { cartItems } = useCart();
+  const { user } = useAuth();
+  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [formData, setFormData] = useState({
+    fullName: user?.name || '',
+    email: user?.email || '',
+    address: '',
+    city: '',
+    zipCode: '',
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const calculateTotal = () => {
+    return cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      if (cartItems.length === 0) {
+        setError("Your cart is empty");
+        setLoading(false);
+        return;
+      }
+
+      // Prepare order data
+      const orderData = {
+        orderItems: cartItems.map(item => ({
+          name: item.name,
+          purchasedQuantity: item.qty,
+          priceAtPurchase: item.price,
+          unitType: 'unit',
+          product: item.id
+        })),
+        shippingAddress: {
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.zipCode,
+        },
+        paymentMethod: paymentMethod === 'card' ? 'Card' : paymentMethod === 'paypal' ? 'PayPal' : 'COD',
+        totalPrice: calculateTotal(),
+        deliverySlot: new Date(Date.now() + 24 * 60 * 60 * 1000)
+      };
+
+      // Submit order to backend
+      const result = await orderAPI.createOrder(orderData);
+      setSuccess("Order placed successfully!");
+      
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+    } catch (err) {
+      setError(err.message || "Failed to place order. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const total = calculateTotal();
+
   return (
     <CheckoutContainer>
       <CheckoutHeading>Checkout</CheckoutHeading>
-      <Form>
-        <Input placeholder="Full Name" required />
-        <Input placeholder="Email" type="email" required />
-        <Input placeholder="Address" required />
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+      {success && <SuccessMessage>{success}</SuccessMessage>}
+      
+      <OrderSummary>
+        <h3>Order Summary</h3>
+        {cartItems.length === 0 ? (
+          <p>Your cart is empty. <a href="/categories">Continue shopping</a></p>
+        ) : (
+          <>
+            {cartItems.map(item => (
+              <OrderItem key={item.id}>
+                <span>{item.name} x {item.qty}</span>
+                <span>₹{(item.price * item.qty).toFixed(2)}</span>
+              </OrderItem>
+            ))}
+            <OrderTotal>
+              <span>Total:</span>
+              <span>₹{total.toFixed(2)}</span>
+            </OrderTotal>
+          </>
+        )}
+      </OrderSummary>
+
+      <Form onSubmit={handleSubmit}>
+        <Input 
+          placeholder="Full Name" 
+          name="fullName"
+          value={formData.fullName}
+          onChange={handleInputChange}
+          required 
+        />
+        <Input 
+          placeholder="Email" 
+          type="email" 
+          name="email"
+          value={formData.email}
+          onChange={handleInputChange}
+          required 
+        />
+        <Input 
+          placeholder="Address" 
+          name="address"
+          value={formData.address}
+          onChange={handleInputChange}
+          required 
+        />
         
         <InputRow>
-          <Input placeholder="City" required />
-          <Input placeholder="ZIP Code" required />
+          <Input 
+            placeholder="City" 
+            name="city"
+            value={formData.city}
+            onChange={handleInputChange}
+            required 
+          />
+          <Input 
+            placeholder="ZIP Code" 
+            name="zipCode"
+            value={formData.zipCode}
+            onChange={handleInputChange}
+            required 
+          />
         </InputRow>
         
         <PaymentSection>
@@ -218,28 +407,62 @@ const Checkout = () => {
           <PaymentMethod>
             <MethodButton 
               type="button"
-              active={paymentMethod === 'card'}
+              $active={paymentMethod === 'card'}
               onClick={() => setPaymentMethod('card')}
             >
               Card
             </MethodButton>
             <MethodButton 
               type="button"
-              active={paymentMethod === 'paypal'}
+              $active={paymentMethod === 'paypal'}
               onClick={() => setPaymentMethod('paypal')}
             >
               PayPal
             </MethodButton>
+            <MethodButton 
+              type="button"
+              $active={paymentMethod === 'cod'}
+              onClick={() => setPaymentMethod('cod')}
+            >
+              COD
+            </MethodButton>
           </PaymentMethod>
         </PaymentSection>
         
-        <Input placeholder="Card Number" maxLength="19" required />
-        <InputRow>
-          <Input placeholder="MM/YY" maxLength="5" required />
-          <Input placeholder="CVV" maxLength="3" required />
-        </InputRow>
+        {paymentMethod !== 'cod' && (
+          <>
+            <Input 
+              placeholder="Card Number" 
+              name="cardNumber"
+              value={formData.cardNumber}
+              onChange={handleInputChange}
+              maxLength="19" 
+              required 
+            />
+            <InputRow>
+              <Input 
+                placeholder="MM/YY" 
+                name="expiryDate"
+                value={formData.expiryDate}
+                onChange={handleInputChange}
+                maxLength="5" 
+                required 
+              />
+              <Input 
+                placeholder="CVV" 
+                name="cvv"
+                value={formData.cvv}
+                onChange={handleInputChange}
+                maxLength="3" 
+                required 
+              />
+            </InputRow>
+          </>
+        )}
         
-        <ConfirmButton type="submit">Confirm Payment</ConfirmButton>
+        <ConfirmButton type="submit" disabled={loading || cartItems.length === 0}>
+          {loading ? "Processing..." : `Confirm Payment (₹${total.toFixed(2)})`}
+        </ConfirmButton>
       </Form>
     </CheckoutContainer>
   );
