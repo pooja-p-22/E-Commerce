@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
-const asyncHandler = require('express-async-handler'); // For cleaner async error handling
+const asyncHandler = require('express-async-handler'); 
 const User = require('../models/User'); 
+const Admin = require('../models/admin');
 const dotenv = require('dotenv');
 
 dotenv.config(); 
@@ -9,11 +10,16 @@ dotenv.config();
 const protect = asyncHandler(async (req, res, next) => {
     let token;
 
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        token = req.headers.authorization.split(' ')[1];
-    } 
-   
-    else if (req.body.token) { 
+    // Prefer Authorization header: "Bearer <token>"
+    const authHeader = req.headers && req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    }
+    // Fallbacks: x-access-token header or token in JSON body
+    else if (req.headers && req.headers['x-access-token']) {
+        token = req.headers['x-access-token'];
+    }
+    else if (req.body && req.body.token) { 
         token = req.body.token;
     }
 
@@ -26,8 +32,15 @@ const protect = asyncHandler(async (req, res, next) => {
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET); 
 
-        
-        req.user = await User.findById(decoded.id).select('-password');
+        // Check which model to use based on role in token
+        if (decoded.role === 'admin') {
+            req.user = await Admin.findById(decoded.id).select('-password');
+            if (req.user) {
+                req.user.role = 'admin'; // Ensure role is set
+            }
+        } else {
+            req.user = await User.findById(decoded.id).select('-password');
+        }
 
         if (!req.user) {
             res.status(401);
@@ -48,10 +61,11 @@ const protect = asyncHandler(async (req, res, next) => {
 
 const authorizeRoles = (...roles) => {
     return (req, res, next) => {
-       
-        if (!req.user || !roles.includes(req.user.role)) {
-            res.status(403); 
-            throw new Error(`Access Denied. User role ${req.user.role} is not authorized for this action.`);
+        const role = req.user?.role;
+        if (!role || !roles.includes(role)) {
+            res.status(403);
+            const roleLabel = role ?? 'unknown';
+            throw new Error(`Access Denied. User role ${roleLabel} is not authorized for this action.`);
         }
         next();
     };

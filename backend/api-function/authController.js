@@ -1,6 +1,8 @@
 const User = require('../models/User');
+const Admin = require('../models/admin');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
+
 
 const generateToken = (id, role) => {
     
@@ -13,6 +15,11 @@ const generateToken = (id, role) => {
 const registerUser = asyncHandler(async (req, res) => {
     
     const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+        res.status(400);
+        throw new Error('Name, email and password are required');
+    }
 
     const userExists = await User.findOne({ email });
 
@@ -47,6 +54,10 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+        res.status(400);
+        throw new Error('Email and password are required');
+    }
 
     const user = await User.findOne({ email });
 
@@ -72,4 +83,69 @@ const getMe = asyncHandler(async (req, res) => {
 });
 
 
-module.exports = { registerUser, loginUser, getMe };
+// Admin Registration
+const registerAdmin = asyncHandler(async (req, res) => {
+    const { firstName, secondName, email, password, mobileNumber, storeName, storeAddress } = req.body;
+
+    if (!firstName || !secondName || !email || !password || !mobileNumber || !storeName) {
+        res.status(400);
+        throw new Error('Missing required admin fields');
+    }
+
+    const adminExists = await Admin.findOne({ email });
+
+    if (adminExists) {
+        res.status(400);
+        throw new Error('Admin already exists');
+    }
+
+    const admin = await Admin.create({
+        firstName,
+        secondName,
+        email,
+        password,
+        mobileNumber,
+        storeName,
+        storeAddress
+    });
+
+    if (admin) {
+        res.status(201).json({
+            _id: admin._id,
+            firstName: admin.firstName,
+            secondName: admin.secondName,
+            email: admin.email,
+            storeName: admin.storeName,
+            role: 'admin',
+            token: generateToken(admin._id, 'admin'),
+        });
+    } else {
+        res.status(400);
+        throw new Error('Invalid admin data');
+    }
+});
+
+
+// Admin Login
+const loginAdmin = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+
+    const admin = await Admin.findOne({ email });
+
+    if (admin && (await admin.matchPassword(password))) {
+        res.json({
+            _id: admin._id,
+            firstName: admin.firstName,
+            secondName: admin.secondName,
+            email: admin.email,
+            role: 'admin',
+            token: generateToken(admin._id, 'admin'),
+        });
+    } else {
+        res.status(401);
+        throw new Error('Invalid email or password');
+    }
+});
+
+
+module.exports = { registerUser, loginUser, getMe, registerAdmin, loginAdmin };

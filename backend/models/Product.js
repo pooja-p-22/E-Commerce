@@ -55,6 +55,21 @@ const productSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    manufacturerDate: {
+        type: Date,
+    },
+    expiryDate: {
+        type: Date,
+    },
+    batchNumber: {
+        type: String,
+    },
+    seller: {
+        type: String,
+    },
+    storageInstructions: {
+        type: String,
+    },
 }, {
     timestamps: true
 });

@@ -30,8 +30,12 @@ const getProductById = asyncHandler(async (req, res) => {
 
 
 const createProduct = asyncHandler(async (req, res) => {
-   
-    const { name, brand, description, unitPrice, unitType, stockQuantity, categoryId } = req.body;
+    const { name, brand, description, unitPrice, unitType, stockQuantity, categoryId, isOrganic, manufacturerDate, expiryDate, batchNumber, seller, storageInstructions } = req.body;
+
+    if (!name || !brand || !description || unitPrice === undefined || !unitType || stockQuantity === undefined || !categoryId) {
+        res.status(400);
+        throw new Error('Missing required product fields');
+    }
 
     const category = await Category.findById(categoryId);
     if (!category) {
@@ -40,7 +44,6 @@ const createProduct = asyncHandler(async (req, res) => {
     }
 
     const product = new Product({
-        user: req.user._id, 
         name,
         brand,
         description,
@@ -48,7 +51,12 @@ const createProduct = asyncHandler(async (req, res) => {
         unitType,
         stockQuantity,
         category: categoryId,
-       
+        isOrganic,
+        manufacturerDate,
+        expiryDate,
+        batchNumber,
+        seller,
+        storageInstructions,
     });
 
     const createdProduct = await product.save();
@@ -57,7 +65,7 @@ const createProduct = asyncHandler(async (req, res) => {
 
 
 const updateProduct = asyncHandler(async (req, res) => {
-    const { name, brand, description, unitPrice, unitType, stockQuantity, categoryId } = req.body;
+    const { name, brand, description, unitPrice, unitType, stockQuantity, categoryId, isOrganic, manufacturerDate, expiryDate, batchNumber, seller, storageInstructions } = req.body;
 
     const product = await Product.findById(req.params.id);
 
@@ -70,6 +78,12 @@ const updateProduct = asyncHandler(async (req, res) => {
         product.unitType = unitType || product.unitType;
         product.stockQuantity = stockQuantity !== undefined ? stockQuantity : product.stockQuantity;
         product.category = categoryId || product.category;
+        product.isOrganic = isOrganic !== undefined ? isOrganic : product.isOrganic;
+        product.manufacturerDate = manufacturerDate || product.manufacturerDate;
+        product.expiryDate = expiryDate || product.expiryDate;
+        product.batchNumber = batchNumber || product.batchNumber;
+        product.seller = seller || product.seller;
+        product.storageInstructions = storageInstructions || product.storageInstructions;
 
         const updatedProduct = await product.save();
         res.json(updatedProduct);

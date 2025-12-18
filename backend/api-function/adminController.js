@@ -26,6 +26,40 @@ const getDeliveryAgents = asyncHandler(async (req, res) => {
     res.json(agents);
 });
 
+const createDeliveryAgent = asyncHandler(async (req, res) => {
+    const { name, email, password, phone, isAvailable } = req.body;
+
+    if (!name || !email || !password) {
+        res.status(400);
+        throw new Error('Name, email and password are required');
+    }
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+        res.status(400);
+        throw new Error('User already exists with this email');
+    }
+
+    const agent = await User.create({
+        name,
+        email,
+        password,
+        role: 'delivery',
+        phone,
+        isAvailable: typeof isAvailable === 'boolean' ? isAvailable : true,
+    });
+
+    res.status(201).json({
+        _id: agent._id,
+        name: agent.name,
+        email: agent.email,
+        role: agent.role,
+        phone: agent.phone,
+        isAvailable: agent.isAvailable,
+        createdAt: agent.createdAt,
+    });
+});
+
 const assignDeliveryAgent = asyncHandler(async (req, res) => {
     const { orderId } = req.params;
     const { agentId } = req.body; 
@@ -84,6 +118,7 @@ const updateProductStock = asyncHandler(async (req, res) => {
 module.exports = {
     getAllOrders,
     getDeliveryAgents,
+    createDeliveryAgent,
     assignDeliveryAgent,
     updateProductStock,
     

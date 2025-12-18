@@ -12,13 +12,38 @@ const createOrder = asyncHandler(async (req, res) => {
         throw new Error('No order items provided');
     }
 
+    if (!shippingAddress || !shippingAddress.address || !shippingAddress.city || !shippingAddress.postalCode) {
+        res.status(400);
+        throw new Error('Invalid shipping address');
+    }
+
+    if (!paymentMethod || !['Card', 'PayPal', 'COD'].includes(paymentMethod)) {
+        res.status(400);
+        throw new Error('Invalid payment method');
+    }
+
+    if (totalPrice === undefined || totalPrice < 0) {
+        res.status(400);
+        throw new Error('Invalid total price');
+    }
+
+    if (!deliverySlot) {
+        res.status(400);
+        throw new Error('Delivery slot is required');
+    }
+
   
     for (const item of orderItems) {
         const product = await Product.findById(item.product);
 
-        if (!product || product.stockQuantity < item.purchasedQuantity) {
+        if (!product) {
+            res.status(404);
+            throw new Error(`Product not found for item: ${item.name || item.product}`);
+        }
+
+        if (product.stockQuantity < item.purchasedQuantity) {
             res.status(400);
-            throw new Error(`Insufficient stock for product: ${item.name}. Available: ${product.stockQuantity}`);
+            throw new Error(`Insufficient stock for product: ${product.name}. Available: ${product.stockQuantity}, requested: ${item.purchasedQuantity}`);
         }
 
         product.stockQuantity -= item.purchasedQuantity;

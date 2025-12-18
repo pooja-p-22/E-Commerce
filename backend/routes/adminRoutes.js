@@ -5,7 +5,7 @@ const { protect, admin } = require('../middleware/authMiddleware');
 
 const { createProduct, updateProduct } = require('../api-function/productController');
 
-const { getAllOrders, getDeliveryAgents, assignDeliveryAgent, updateProductStock } = require('../api-function/adminController');
+const { getAllOrders, getDeliveryAgents, createDeliveryAgent, assignDeliveryAgent, updateProductStock } = require('../api-function/adminController');
 
 const { createCategory, deleteCategory } = require('../api-function/categoryController');
 
@@ -29,6 +29,8 @@ router.get('/orders', protect, admin, getAllOrders);
 
 router.put('/orders/:orderId/assign', protect, admin, assignDeliveryAgent); 
 
-router.get('/users/delivery', protect, admin, getDeliveryAgents); 
+router.route('/users/delivery')
+    .get(protect, admin, getDeliveryAgents)
+    .post(protect, admin, createDeliveryAgent);
 
 module.exports = router;
