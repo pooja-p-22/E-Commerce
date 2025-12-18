@@ -1,142 +1,102 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useCart } from './CartContext';
+// src/components/ProductCard.jsx
+import React from "react";
+import styled from "styled-components";
+import { useCart } from "./CartContext";
 
 const Card = styled.div`
-  background: white;
-  border-radius: 15px;
+  background: #ffffff;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  
-  &:hover { 
-    transform: translateY(-8px); 
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-  }
 
-  @media (max-width: 768px) {
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-
-    &:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 12px 25px rgba(0,0,0,0.12);
-    }
-  }
-
-  @media (max-width: 480px) {
-    border-radius: 10px;
-    
-    &:hover {
-      transform: translateY(-4px);
-    }
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.16);
   }
 `;
 
 const ProductImage = styled.img`
   width: 100%;
-  height: 180px;
+  height: 220px;
   object-fit: cover;
 
   @media (max-width: 768px) {
-    height: 160px;
-  }
-
-  @media (max-width: 480px) {
-    height: 140px;
+    height: 180px;
   }
 `;
 
-const ProductInfo = styled.div`
-  padding: 1.25rem;
+const Info = styled.div`
+  padding: 1.25rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  flex-grow: 1;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-
-  @media (max-width: 480px) {
-    padding: 0.875rem;
-  }
+  gap: 0.4rem;
 `;
 
-const ProductName = styled.h3`
-  font-size: clamp(0.875rem, 2vw, 1.1rem);
-  font-weight: bold;
+const Name = styled.h3`
+  font-size: 1.2rem;
+  font-weight: 700;
   color: #2c3e50;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.3;
+  margin: 0;
+`;
 
-  @media (max-width: 480px) {
-    margin: 0 0 0.35rem 0;
-    font-size: 0.95rem;
-  }
+const PriceRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const Price = styled.span`
-  font-size: clamp(1rem, 2.5vw, 1.3rem);
-  font-weight: bold;
+  font-size: 1.4rem;
+  font-weight: 800;
   color: #27ae60;
-  margin-bottom: 0.75rem;
+`;
 
-  @media (max-width: 480px) {
-    font-size: 1.05rem;
-    margin-bottom: 0.5rem;
-  }
+const Tag = styled.span`
+  font-size: 0.85rem;
+  color: #95a5a6;
 `;
 
 const AddButton = styled.button`
+  margin-top: 0.75rem;
   width: 100%;
-  background: linear-gradient(45deg, #3498db, #2980b9);
-  color: white;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
   border: none;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-weight: bold;
   cursor: pointer;
-  font-size: clamp(0.875rem, 1.5vw, 1rem);
-  transition: all 0.3s ease;
-  margin-top: auto;
+  font-weight: 600;
+  font-size: 1rem;
+  background: linear-gradient(45deg, #3498db, #2980b9);
+  color: #ffffff;
+  transition: background 0.25s ease, transform 0.1s ease;
 
-  &:hover { 
+  &:hover {
     background: linear-gradient(45deg, #2980b9, #3498db);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
   }
 
   &:active {
-    transform: translateY(0);
-  }
-
-  @media (max-width: 768px) {
-    padding: 0.65rem 0.875rem;
-  }
-
-  @media (max-width: 480px) {
-    padding: 0.6rem 0.75rem;
-    font-size: 0.875rem;
+    transform: scale(0.97);
   }
 `;
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
-  
+
   return (
     <Card>
       <ProductImage src={product.img} alt={product.name} />
-      <ProductInfo>
-        <ProductName>{product.name}</ProductName>
-        <Price>${product.price}</Price>
+      <Info>
+        <Name>{product.name}</Name>
+        <PriceRow>
+          <Price>₹{product.price.toFixed(2)}</Price>
+          <Tag>Fresh • In stock</Tag>
+        </PriceRow>
         <AddButton onClick={() => addToCart(product)}>
           Add to Cart
         </AddButton>
-      </ProductInfo>
+      </Info>
     </Card>
   );
 };

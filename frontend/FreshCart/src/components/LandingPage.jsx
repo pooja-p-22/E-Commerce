@@ -31,9 +31,18 @@ const LandingContainer = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: clamp(2rem, 8vw, 5rem);
+
+  font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 900;
-  background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1);
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 1px;
+
+color: #b9fff3;
+text-shadow:
+  0 0 6px rgba(185, 255, 243, 0.9),
+  0 0 14px rgba(78, 205, 196, 0.7);
+  background: linear-gradient(45deg, #cb7777ff, #4cc9c1ff, #45B7D1);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -47,7 +56,8 @@ const Title = styled.h1`
 `;
 
 const EnterButton = styled.button`
-  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  background: linear-gradient(45deg, #cb7777ff, #4cc9c1ff, #45B7D1);
+  
   border: none;
   padding: 1rem 2.5rem;
   font-size: clamp(1rem, 2vw, 1.5rem);
