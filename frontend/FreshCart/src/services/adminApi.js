@@ -3,10 +3,16 @@ const API_BASE_URL = 'http://localhost:21000/api/v1';
 
 const getToken = () => localStorage.getItem('token');
 
-const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${getToken()}`
-});
+const getHeaders = () => {
+  const token = getToken();
+  if (!token) {
+    throw new Error('No authentication token found. Please login again.');
+  }
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+};
 
 export const adminAPI = {
   // Product Management

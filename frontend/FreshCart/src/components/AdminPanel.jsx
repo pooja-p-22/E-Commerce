@@ -169,6 +169,8 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
   const [newProduct, setNewProduct] = useState({
     name: '',
     brand: '',
@@ -254,6 +256,7 @@ const AdminPanel = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await adminAPI.createProduct({
         ...newProduct,
@@ -271,9 +274,16 @@ const AdminPanel = () => {
         isOrganic: false
       });
       setShowAddProduct(false);
+      setMessage('Product added successfully!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 3000);
       loadData();
     } catch (error) {
-      console.error('Error adding product:', error);
+      setMessage(error.message || 'Failed to add product');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -325,6 +335,7 @@ const AdminPanel = () => {
 
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await adminAPI.updateProduct(editingProduct, {
         ...editProduct,
@@ -342,9 +353,16 @@ const AdminPanel = () => {
         categoryId: '',
         isOrganic: false
       });
+      setMessage('Product updated successfully!');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 3000);
       loadData();
     } catch (error) {
-      console.error('Error updating product:', error);
+      setMessage(error.message || 'Failed to update product');
+      setMessageType('error');
+      setTimeout(() => setMessage(''), 3000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -393,6 +411,19 @@ const AdminPanel = () => {
       </TabContainer>
 
       <ContentArea>
+        {message && (
+          <div style={{
+            padding: '1rem',
+            marginBottom: '1rem',
+            borderRadius: '8px',
+            background: messageType === 'success' ? '#d4edda' : '#f8d7da',
+            color: messageType === 'success' ? '#155724' : '#721c24',
+            border: `1px solid ${messageType === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
+            fontWeight: '600'
+          }}>
+            {message}
+          </div>
+        )}
         {loading && <p>Loading...</p>}
         
         {activeTab === 'products' && (
