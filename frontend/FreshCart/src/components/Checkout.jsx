@@ -321,11 +321,11 @@ const Checkout = () => {
 
       // Submit order to backend
       const result = await orderAPI.createOrder(orderData);
-      setSuccess("Order placed successfully!");
+      setSuccess("Order placed successfully! Redirecting to your bill...");
       
       setTimeout(() => {
-        navigate('/');
-      }, 2000);
+        navigate(`/bill/${result._id}`);
+      }, 1500);
     } catch (err) {
       setError(err.message || "Failed to place order. Please try again.");
     } finally {

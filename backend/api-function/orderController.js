@@ -74,6 +74,25 @@ const getOrdersByUser = asyncHandler(async (req, res) => {
     res.json(orders);
 });
 
+const getOrderById = asyncHandler(async (req, res) => {
+    const order = await Order.findById(req.params.id)
+        .populate('user', 'name email')
+        .populate('orderItems.product', 'name images');
+
+    if (!order) {
+        res.status(404);
+        throw new Error('Order not found');
+    }
+
+    // Check if user owns this order or is admin
+    if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+        res.status(403);
+        throw new Error('Not authorized to view this order');
+    }
+
+    res.json(order);
+});
+
 
 const getAssignedOrders = asyncHandler(async (req, res) => {
    
@@ -107,6 +126,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 module.exports = {
     createOrder,
     getOrdersByUser,
+    getOrderById,
     getAssignedOrders,
     updateOrderStatus,
 };

@@ -14,6 +14,7 @@ import Login from "./components/Login";
 import AdminPanel from "./components/AdminPanel";
 import OrderHistory from "./components/OrderHistory";
 import CustomerDashboard from "./components/CustomerDashboard";
+import Bill from "./components/Bill";
 
 function App() {
   return (
@@ -53,6 +54,14 @@ function App() {
               } 
             />
             <Route path="/customer-dashboard" element={<CustomerDashboard />} />
+            <Route 
+              path="/bill/:orderId" 
+              element={
+                <ProtectedRoute>
+                  <Bill />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </CartProvider>
       </AuthProvider>

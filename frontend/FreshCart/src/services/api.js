@@ -133,4 +133,14 @@ export const orderAPI = {
     if (!response.ok) throw new Error(data.message || 'Failed to fetch orders');
     return data;
   },
+
+  getOrderById: async (orderId) => {
+    const response = await fetch(`${API_BASE_URL}/customer/orders/${orderId}`, {
+      method: 'GET',
+      headers: getHeaders(true),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch order');
+    return data;
+  },
 };
