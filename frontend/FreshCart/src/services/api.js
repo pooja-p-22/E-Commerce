@@ -1,5 +1,5 @@
 // API service for communicating with backend
-const API_BASE_URL = 'http://localhost:21000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:21000/api/v1';
 
 // Helper to get token from localStorage
 const getToken = () => localStorage.getItem('token');

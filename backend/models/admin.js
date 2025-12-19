@@ -1,7 +1,5 @@
-// /models/admin.js
-
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt'); // Required for pre-save hook
+const bcrypt = require('bcrypt'); 
 
 const AdminSchema = new mongoose.Schema({
     firstName: {
@@ -40,7 +38,6 @@ const AdminSchema = new mongoose.Schema({
 });
 
 
-// 1. Password Hashing (Pre-Save Hook)
 AdminSchema.pre('save', async function () { 
     if (!this.isModified('password')) {
         return;
@@ -49,9 +46,9 @@ AdminSchema.pre('save', async function () {
     this.password = await bcrypt.hash(this.password, salt);
 });
 
-// 2. Password Comparison Method
+
 AdminSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model("Admin", AdminSchema); // Export the Admin model
+module.exports = mongoose.model("Admin", AdminSchema); 

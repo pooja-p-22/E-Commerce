@@ -20,7 +20,7 @@ const Dashboard = () => {
   }
 
   if (isAdmin) {
-    return null; // Will redirect to /admin
+    return null; 
   }
 
   return <CustomerDashboard />;

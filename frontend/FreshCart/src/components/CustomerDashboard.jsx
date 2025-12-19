@@ -11,7 +11,7 @@ const DashboardContainer = styled.div`
 `;
 
 const HeroSection = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #66eacbff 0%, #a24b68ff 100%);
   padding: 4rem 2rem;
   text-align: center;
   color: white;

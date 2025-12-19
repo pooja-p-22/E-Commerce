@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
-const Product = require('../models/Product'); // Assuming Product model path
-const Category = require('../models/Category'); // Assuming Category model path
+const Product = require('../models/Product'); 
+const Category = require('../models/Category'); 
 
 const getProducts = asyncHandler(async (req, res) => {
    
@@ -13,7 +13,7 @@ const getProducts = asyncHandler(async (req, res) => {
           }
         : {};
 
-    const products = await Product.find({ ...keyword }).populate('category', 'name slug'); // Show category name/slug
+    const products = await Product.find({ ...keyword }).populate('category', 'name slug'); 
     res.json(products);
 });
 

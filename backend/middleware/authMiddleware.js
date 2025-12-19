@@ -10,12 +10,12 @@ dotenv.config();
 const protect = asyncHandler(async (req, res, next) => {
     let token;
 
-    // Prefer Authorization header: "Bearer <token>"
+    
     const authHeader = req.headers && req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.split(' ')[1];
     }
-    // Fallbacks: x-access-token header or token in JSON body
+    
     else if (req.headers && req.headers['x-access-token']) {
         token = req.headers['x-access-token'];
     }
@@ -32,16 +32,16 @@ const protect = asyncHandler(async (req, res, next) => {
         
         const decoded = jwt.verify(token, process.env.JWT_SECRET); 
 
-        // Check which model to use based on role in token
+        
         if (decoded.role === 'admin') {
             req.user = await Admin.findById(decoded.id).select('-password');
             if (req.user) {
-                req.user.role = 'admin'; // Ensure role is set
+                req.user.role = 'admin';
             }
         } else {
             req.user = await User.findById(decoded.id).select('-password');
             if (req.user) {
-                req.user.role = req.user.role || 'customer'; // Ensure role is set
+                req.user.role = req.user.role || 'customer'; 
             }
         }
 

@@ -17,11 +17,18 @@ connectDB();
 
 const app = express();
 
-app.use(cors()); 
+// Configure CORS for production
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.FRONTEND_URL || '*'
+    : '*',
+  credentials: true
+};
+app.use(cors(corsOptions)); 
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: false }));
 
-// Serve static files (images) from frontend public directory
+
 app.use(express.static(path.join(__dirname, '../frontend/FreshCart/public'))); 
 
 app.get('/', (req, res) => {
@@ -39,4 +46,10 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
+// For Vercel serverless deployment
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
+}
+
+// Export for Vercel
+module.exports = app;
