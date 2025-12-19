@@ -31,24 +31,30 @@ const LandingContainer = styled.div`
 `;
 
 const Title = styled.h1`
-
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 900;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   letter-spacing: 1px;
-
-color: #b9fff3;
-text-shadow:
-  0 0 6px rgba(185, 255, 243, 0.9),
-  0 0 14px rgba(78, 205, 196, 0.7);
-  background: linear-gradient(45deg, #cb7777ff, #4cc9c1ff, #45B7D1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
+  text-shadow:
+    0 0 20px rgba(255, 255, 255, 0.8),
+    0 0 40px rgba(255, 255, 255, 0.6),
+    0 0 60px rgba(255, 255, 255, 0.4),
+    2px 2px 12px rgba(0,0,0,0.9),
+    4px 4px 20px rgba(0,0,0,0.7);
   margin: 0;
-  text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-  letter-spacing: 1px;
+  animation: popupTitle 1s ease-out;
+
+  @keyframes popupTitle {
+    0% {
+      opacity: 0;
+      transform: translateY(-50px) scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 
   @media (max-width: 480px) {
     font-size: clamp(1.5rem, 6vw, 3rem);
@@ -57,7 +63,6 @@ text-shadow:
 
 const EnterButton = styled.button`
   background: linear-gradient(45deg, #cb7777ff, #4cc9c1ff, #45B7D1);
-  
   border: none;
   padding: 1rem 2.5rem;
   font-size: clamp(1rem, 2vw, 1.5rem);
@@ -69,6 +74,18 @@ const EnterButton = styled.button`
   transition: all 0.3s ease;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   min-width: 200px;
+  animation: popupButton 1s ease-out 0.5s both;
+
+  @keyframes popupButton {
+    0% {
+      opacity: 0;
+      transform: translateY(50px) scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
 
   &:hover { 
     transform: scale(1.05);

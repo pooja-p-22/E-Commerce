@@ -171,6 +171,17 @@ const products = [
     categorySlug: 'snacks'
   },
   {
+    name: 'Chocolate Cake',
+    brand: 'SweetTreats',
+    description: 'Rich and moist chocolate cake',
+    images: ['/cake.jpg'],
+    unitPrice: 180,
+    unitType: 'unit',
+    stockQuantity: 25,
+    isOrganic: false,
+    categorySlug: 'snacks'
+  },
+  {
     name: 'Fresh Apple Juice',
     brand: 'FreshJuice',
     description: 'Pure apple juice with no added sugar',

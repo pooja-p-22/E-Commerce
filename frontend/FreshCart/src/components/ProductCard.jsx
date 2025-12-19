@@ -84,7 +84,7 @@ const AddButton = styled.button`
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
-  // Handle both old format (id, img, price) and new backend format (_id, unitPrice, etc.)
+ 
   const productId = product._id || product.id;
   const productName = product.name;
   const productPrice = product.unitPrice || product.price;
